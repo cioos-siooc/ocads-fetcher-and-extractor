@@ -7,6 +7,7 @@ from ftplib import FTP
 
 RATE_LIMIT_DELAY = 1
 MAX_DELAY = 60
+MAX_FTP_RETRIES = 5
 
 def download_xml(xml_url, save_path):
     headers = {"User-Agent": "CIOOS MirrorBot", "Accept": "application/xml"}
@@ -86,7 +87,8 @@ def download_ftp_tree(ftp, local_dir):
 def download_ftp_directory(ftp_url, save_path):
     parsed_url = urlparse(ftp_url)
     delay = RATE_LIMIT_DELAY
-    while True:
+    attempts = 0
+    while attempts < MAX_FTP_RETRIES:
         time.sleep(RATE_LIMIT_DELAY)
         try:
             ftp = FTP(parsed_url.hostname)
@@ -94,9 +96,13 @@ def download_ftp_directory(ftp_url, save_path):
             ftp.cwd(parsed_url.path)
             break
         except Exception as err:
-            print("FTP connection error for {}: {}. Waiting {} seconds.".format(ftp_url, err, delay))
+            attempts += 1
+            print("FTP connection error for {}: {}. Attempt {}/{}. Waiting {} seconds.".format(ftp_url, err, attempts, MAX_FTP_RETRIES, delay))
             time.sleep(delay)
             delay = min(delay * 2, MAX_DELAY)
+    else:
+        print("Max FTP connection attempts reached for {}. Skipping FTP download.".format(ftp_url))
+        return
     download_ftp_tree(ftp, save_path)
     ftp.quit()
     print("FTP directory downloaded to {}".format(save_path))
