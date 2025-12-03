@@ -1,6 +1,13 @@
 import requests
 import json
 import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+if not os.path.exists('.env'):
+    raise FileNotFoundError('.env file not found. Please create a .env file by copying .env.example and configuring it.')
+load_dotenv()
 
 BASE_URL = "https://www.ncei.noaa.gov/metadata/geoportal/opensearch"
 
@@ -69,9 +76,19 @@ def fetch_ocads_results(bbox=None, extra_terms=None, keywords=None, time_range=N
     print(f"Results saved to {filename}")
     return filename
 
-fetch_ocads_results(
-    bbox="-150.00000,40.00000,-40.00000,90.00000",
-    extra_terms=["pH"],
-    #time_range="1990-01-01/2025-12-12",
-    #keywords="fish examination"
-)
+if __name__ == "__main__":
+    # Load configuration from environment variables
+    bbox = os.getenv("BBOX")
+    extra_terms_str = os.getenv("EXTRA_TERMS", "")
+    extra_terms = [term.strip() for term in extra_terms_str.split(",") if term.strip()]
+    keywords = os.getenv("KEYWORDS")
+    time_range = os.getenv("TIME_RANGE")
+    filename = os.getenv("RESULTS_FILENAME", "ocads_results.json")
+    
+    fetch_ocads_results(
+        bbox=bbox,
+        extra_terms=extra_terms if extra_terms else None,
+        keywords=keywords,
+        time_range=time_range,
+        filename=filename
+    )

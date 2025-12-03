@@ -4,6 +4,12 @@ import ijson
 import time
 from urllib.parse import urlparse
 from ftplib import FTP
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+if not os.path.exists('.env'):
+    raise FileNotFoundError('.env file not found. Please create a .env file by copying .env.example and configuring it.')
+load_dotenv()
 
 RATE_LIMIT_DELAY = 1
 MAX_DELAY = 60
@@ -130,7 +136,7 @@ def download_http_file(url, save_path):
     time.sleep(RATE_LIMIT_DELAY)
 
 def extract_from_ocads_results(json_file):
-    base_dir = "datasets"
+    base_dir = os.getenv("DATASETS_DIR", "datasets")
     os.makedirs(base_dir, exist_ok=True)
     with open(json_file, "r", encoding="utf-8") as f:
         for entry in ijson.items(f, "item"):
@@ -166,4 +172,5 @@ def extract_from_ocads_results(json_file):
     print("Extraction complete.")
 
 if __name__ == "__main__":
-    extract_from_ocads_results("ocads_results.json")
+    results_filename = os.getenv("RESULTS_FILENAME", "ocads_results.json")
+    extract_from_ocads_results(results_filename)

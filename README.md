@@ -16,25 +16,48 @@ The project consists of two main scripts:
 - Organized data extraction and storage in structured directories.
 
 ## Prerequisites
-- Python 3.8+
-- Pip
+- Python 3.13+
+- [uv](https://github.com/astral-sh/uv) - A fast Python package installer and resolver
 
 ### Python Libraries
-The following libraries are required:
-- `requests`
-- `ijson`
-
-Install them via pip:
-```
-pip install requests ijson
+Install dependencies using uv:
+```bash
+uv sync
 ```
 
 ## Usage
 
+### Configuration
+
+Create a `.env` file in the project root by copying `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your desired search parameters:
+
+```env
+BBOX=-150.00000,40.00000,-40.00000,90.00000
+EXTRA_TERMS=pH
+KEYWORDS=
+TIME_RANGE=
+RESULTS_FILENAME=ocads_results.json
+DATASETS_DIR=datasets
+```
+
+**Configuration options:**
+- `BBOX`: Bounding box coordinates (longitude, latitude) in format `west_lon,south_lat,east_lon,north_lat`
+- `EXTRA_TERMS`: Comma-separated search terms
+- `KEYWORDS`: Specific keywords for filtering
+- `TIME_RANGE`: Time range in format `YYYY-MM-DD/YYYY-MM-DD`
+- `RESULTS_FILENAME`: Output filename for fetched results (default: `ocads_results.json`)
+- `DATASETS_DIR`: Output directory for extracted data (default: `datasets`)
+
 ### Fetching OCADS Results
 To run the data fetching script, execute:
-```
-python ocads_fetcher.py
+```bash
+uv run python ocads_fetcher.py
 ```
 You can customize the query by modifying the parameters in the `fetch_ocads_results` function call.
 
@@ -47,8 +70,8 @@ You can customize the query by modifying the parameters in the `fetch_ocads_resu
 
 ### Extracting Data from Results
 To download and extract the data files:
-```
-python ocads_extractor.py
+```bash
+uv run python ocads_extractor.py
 ```
 This will process the `ocads_results.json` file and download the relevant files into the `datasets/` directory.
 
