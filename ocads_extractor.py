@@ -17,6 +17,10 @@ MAX_FTP_RETRIES = 5
 MAX_HTTP_RETRIES = 5
 
 def download_xml(xml_url, save_path):
+    if os.path.exists(save_path):
+        print("File already exists, skipping: {}".format(save_path))
+        return
+    
     headers = {"User-Agent": "CIOOS MirrorBot", "Accept": "application/xml"}
     delay = RATE_LIMIT_DELAY
     attempts = 0
@@ -89,6 +93,11 @@ def download_ftp_tree(ftp, local_dir):
             download_ftp_tree(ftp, local_path)
             ftp.cwd("..")
         else:
+            if os.path.exists(local_path):
+                print("File already exists, skipping: {}".format(local_path))
+                time.sleep(RATE_LIMIT_DELAY)
+                continue
+            
             with open(local_path, "wb") as f:
                 delay_file = RATE_LIMIT_DELAY
                 file_attempts = 0
@@ -132,6 +141,10 @@ def download_ftp_directory(ftp_url, save_path):
     print("FTP directory downloaded to {}".format(save_path))
 
 def download_http_file(url, save_path):
+    if os.path.exists(save_path):
+        print("File already exists, skipping: {}".format(save_path))
+        return
+    
     headers = {"User-Agent": "CIOOS MirrorBot"}
     delay = RATE_LIMIT_DELAY
     attempts = 0
@@ -175,9 +188,6 @@ def extract_from_ocads_results(json_file):
             entry_id = entry["id"]
             safe_entry_id = entry_id.replace(":", "_")
             entry_dir = os.path.join(base_dir, safe_entry_id)
-            if os.path.exists(entry_dir):
-                print("Skipping previously downloaded dataset {}".format(entry_id))
-                continue
             os.makedirs(entry_dir, exist_ok=True)
             
             try:
